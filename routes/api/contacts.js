@@ -16,10 +16,10 @@ router.get('/', listContacts)
 
 router.get('/:id', getContactById)
 
-router.post('/', validateBody(schemas.addSchema), addContact)
+router.post('/', validateBody(schemas.addContactSchema), addContact)
 
 router.delete('/:id', removeContact)
 
-router.put('/:id', validateBody(schemas.addSchema), updateContact)
+router.put('/:id', validateBody(schemas.updateContactSchema), updateContact)
 
 module.exports = router
