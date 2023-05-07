@@ -11,8 +11,9 @@ const listContacts = async (req, res) => {
 
 const getContactById = async (req, res) => {
     const { id } = req.params;
+    const {_id: owner} = req.user;
     const result = await Contact.findById(id);
-    if (!result) {
+    if (!result || result.owner !== owner) {
         throw HttpError(404, "Not found");
     }
     res.json(result);
@@ -26,9 +27,14 @@ const addContact = async (req, res) => {
 
 const updateContact = async (req, res) => {
     const { id } = req.params;
+    const {_id: owner} = req.user;
       if(!req.body.name && !req.body.email && !req.body.phone) {
         throw HttpError(400, "missing fields");
       }
+      const contact = await Contact.findById(id);
+    if(contact.owner !== owner) {
+        throw HttpError(403, "Forbidden")
+    }
     const result = await Contact.findByIdAndUpdate(id, req.body, {new: true});
     if (!result) {
         throw HttpError(404, "Not found");
@@ -38,20 +44,31 @@ const updateContact = async (req, res) => {
 
 const removeContact = async (req, res) => {
     const { id } = req.params;
+    const {_id: owner} = req.user;
+    const contact = await Contact.findById(id);
+    if(contact.owner !== owner) {
+        throw HttpError(403, "Forbidden")
+    }
     const result = await Contact.findByIdAndRemove(id);
     if (!result) {
         throw HttpError(404, "Not found");
     }
     res.json({
+        result,
         message: "Delete success"
     })
 }
 
 const updateStatusContact = async (req, res) => {
     const { id } = req.params;
+    const {_id: owner} = req.user;
     if(!req.body.favorite) {
         throw HttpError(400, "missing field favorite");
       }
+      const contact = await Contact.findById(id);
+    if(contact.owner !== owner) {
+        throw HttpError(403, "Forbidden")
+    }
     const result = await Contact.findByIdAndUpdate(id, req.body, {new: true});
     if (!result) {
         throw HttpError(404, "Not found");
